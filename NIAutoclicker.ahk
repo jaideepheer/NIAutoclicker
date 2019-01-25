@@ -1,5 +1,6 @@
 ﻿;Non-Intrusive Autoclicker, by Shadowspaz
-;v2.1.1
+;v2.1.1M - Modded
+;Modded for right click support by Jaideep
 
 #InstallKeybdHook
 #SingleInstance, Force
@@ -13,6 +14,11 @@ toggle := false
 inputPresent := false
 mouseMoved := false
 settingPoints := false
+
+;======== MOD =========
+isLeftClick := true
+toolTipOpen := true
+;======================
 
 clickRate := 20
 Mode := 0
@@ -29,11 +35,29 @@ setTimer, checkMouseMovement, 10
 
 setTimer, setTip, 5
 TTStart = %A_TickCount%
-while (A_TickCount - TTStart < 5000 && !toggle)
+while (A_TickCount - TTStart < 5000 && !toggle && toolTipOpen)
 {
-  TooltipMsg = Press (Alt + Backspace) to toggle autoclicker `n Press (Alt + Dash(-)) for options
+  TooltipMsg = Press (Alt + Backspace) to toggle autoclicker `n Press (Alt + Dash(-)) for options `n Press (Alt + h) to show/hide this tooltip
 }
   TooltipMsg =
+  toolTipOpen := false
+
+;========================================== MOD ==========================================
+!h::
+  if(!toolTipOpen)
+  {
+    TooltipMsg = Press (Alt + Backspace) to toggle autoclicker `n Press (Alt + Dash(-)) for options `n Press (Alt + h) to show/hide this tooltip
+    toolTipOpen := true
+    setTimer, setTip, 5
+  }
+  else
+  {
+    TooltipMsg =
+    toolTipOpen := false
+    setTimer, setTip, 5
+  }
+return
+;=========================================================================================
 
 !-::
   IfWinNotExist, NIAC Settings
@@ -48,7 +72,7 @@ while (A_TickCount - TTStart < 5000 && !toggle)
 
     prevTC := totalClicks
 
-    Gui, Show, w210 h160, NIAC Settings
+    Gui, Show, w210 h185, NIAC Settings
     Gui, Add, Radio, x25 y10 gActEdit1 vmode, Clicks per second:
     Gui, Add, Radio, x25 y35 gActEdit2, Seconds per click:
     Gui, Add, Edit, x135 y8 w50 Number Left vtempRateCPS, % tempRateCPS
@@ -59,8 +83,10 @@ while (A_TickCount - TTStart < 5000 && !toggle)
     Gui, Add, Text, x27 y100, (Default is 50 clicks per second)
     Gui, Add, Button, x60 y117 gReset, Reset
     Gui, Add, Button, x112 y117 Default gSetVal, Set
+    Gui, Add, DropDownList, x40 y145 vClickMode gOnClickModeChange , Left Click|Right Click
     Gui, Font, s6
-    Gui, Add, Text, x188 y151, v2.1.1
+    Gui, Add, Text, x168 y165, v2.1.1M
+    Gui, Add, Text, x143 y174, RightClick Support
     if mode < 2
     {
       GuiControl,, Mode, 1
@@ -74,7 +100,28 @@ while (A_TickCount - TTStart < 5000 && !toggle)
   }
   else
     WinActivate, NIAC Settings
+  ;============== MOD ==============
+  if(isLeftClick = true)
+  {
+    GuiControl, Choose, ClickMode, 1
+  }
+  else
+    GuiControl, Choose, ClickMode, 2
+  ;=================================
 return
+
+;===================== MOD =====================
+OnClickModeChange:
+  if(ClickMode = "Left Click")
+  {
+    isLeftClick := true
+  }
+  else if(ClickMode = "Right Click")
+  {
+    isLeftClick := false
+  }
+return
+;;===============================================
 
 ActEdit1:
   GuiControl, Enable, tempRateCPS
@@ -212,7 +259,18 @@ autoclick:
   {
     cx := xp%currentClick%
     cy := yp%currentClick%
-    ControlClick, x%cx% y%cy%, ahk_id %actWin%,,,, NA
+
+    ;============================== MOD ==============================
+    if(isLeftClick = true)
+    {
+      ControlClick, x%cx% y%cy%, ahk_id %actWin%,, LEFT ,, NA
+    }
+    else
+    {
+      ControlClick, x%cx% y%cy%, ahk_id %actWin%,, RIGHT ,, NA
+    }
+    ;=================================================================
+
     currentClick := % Mod(currentClick + 1, totalClicks)
   }
 return
