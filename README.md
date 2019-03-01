@@ -1,8 +1,11 @@
-# NIAutoclicker - Modded for Right Click Support
+### NIAutoclicker - Modded for Right Click Support
 ## Modded version
 This version adds support for `Right Click` and a hotkey to show/hide the help tooltip.
 
 # NOTE: Original version made by [`Shadowspaz`](https://github.com/Shadowspaz). Visit [here](https://github.com/Shadowspaz/NIAutoclicker) to see the original repository.
+
+---
+---
 
 ##### Autoclicks in the background, giving you full control of your own mouse to do whatever else you want! #####
 ### How To Use ###
