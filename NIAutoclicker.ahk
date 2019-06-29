@@ -1,4 +1,4 @@
-﻿;Non-Intrusive Autoclicker, by Shadowspaz
+;Non-Intrusive Autoclicker, by Shadowspaz
 ;v2.1.1M - Modded
 ;Modded for right click support by Jaideep
 
@@ -18,6 +18,7 @@ settingPoints := false
 ;======== MOD =========
 isLeftClick := true
 toolTipOpen := true
+moveMouse := true
 ;======================
 
 clickRate := 20
@@ -72,7 +73,7 @@ return
 
     prevTC := totalClicks
 
-    Gui, Show, w210 h185, NIAC Settings
+    Gui, Show, w210 h207, NIAC Settings
     Gui, Add, Radio, x25 y10 gActEdit1 vmode, Clicks per second:
     Gui, Add, Radio, x25 y35 gActEdit2, Seconds per click:
     Gui, Add, Edit, x135 y8 w50 Number Left vtempRateCPS, % tempRateCPS
@@ -83,10 +84,11 @@ return
     Gui, Add, Text, x27 y100, (Default is 50 clicks per second)
     Gui, Add, Button, x60 y117 gReset, Reset
     Gui, Add, Button, x112 y117 Default gSetVal, Set
-    Gui, Add, DropDownList, x40 y145 vClickMode gOnClickModeChange , Left Click|Right Click
+    Gui, Add, CheckBox, x5 y145 vMoveMouseMode gOnMoveMouseModeChange , Move mouse to click position(intrusive)
+    Gui, Add, DropDownList, x45 y163 vClickMode gOnClickModeChange , Left Click|Right Click
     Gui, Font, s6
-    Gui, Add, Text, x168 y165, v2.1.1M
-    Gui, Add, Text, x143 y174, RightClick Support
+    Gui, Add, Text, x168 y187, v2.1.2M
+    Gui, Add, Text, x143 y196, RightClick Support
     if mode < 2
     {
       GuiControl,, Mode, 1
@@ -106,7 +108,17 @@ return
     GuiControl, Choose, ClickMode, 1
   }
   else
+  {
     GuiControl, Choose, ClickMode, 2
+  }
+  if moveMouse
+  {
+    GuiControl,,MoveMouseMode,1
+  }
+  else
+  {
+    GuiControl,,MoveMouseMode,0
+  }
   ;=================================
 return
 
@@ -120,6 +132,10 @@ OnClickModeChange:
   {
     isLeftClick := false
   }
+return
+
+OnMoveMouseModeChange:
+  moveMouse := !moveMouse
 return
 ;;===============================================
 
@@ -200,6 +216,7 @@ return
       else ; If values ARE set (actWin contains data):
       {
         settingPoints := false
+        BlockInput, SendAndMouse
         setTimer, setTip, 5
         TTStart = %A_TickCount%
         TooltipMsg = ##Autoclick enabled.
@@ -211,6 +228,7 @@ return
     else
     {
        setTimer, setTip, 5
+       BlockInput, Off
        TTStart = %A_TickCount%
        TooltipMsg = ##Autoclick disabled.
        setTimer, autoclick, off
@@ -261,6 +279,11 @@ autoclick:
     cy := yp%currentClick%
 
     ;============================== MOD ==============================
+    ; move mouse to pos.
+    if(moveMouse = true)
+    {
+      MouseMove, %cx%, %cy%, 0,
+    }
     if(isLeftClick = true)
     {
       ControlClick, x%cx% y%cy%, ahk_id %actWin%,, LEFT ,, NA
@@ -270,7 +293,6 @@ autoclick:
       ControlClick, x%cx% y%cy%, ahk_id %actWin%,, RIGHT ,, NA
     }
     ;=================================================================
-
     currentClick := % Mod(currentClick + 1, totalClicks)
   }
 return
